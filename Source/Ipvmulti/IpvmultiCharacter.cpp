@@ -13,6 +13,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Engine/Engine.h"
 #include "ThirdPersonMPProjectile.h"
+#include "Actors/AmmoPickup.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -64,6 +65,10 @@ AIpvmultiCharacter::AIpvmultiCharacter()
 	//Initialize fire rate
 	FireRate = 0.25f;
 	bIsFiringWeapon = false;
+	AmmoCount = 5;
+	
+	
+
 }
 
 void AIpvmultiCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -71,6 +76,8 @@ void AIpvmultiCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(AIpvmultiCharacter, CurrentHealth);
+	DOREPLIFETIME(AIpvmultiCharacter, AmmoCount);
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -117,6 +124,21 @@ void AIpvmultiCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
  
 
 }
+
+void AIpvmultiCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT("Colisión detectada con: %s"), *OtherActor->GetName()));
+
+	AAmmoPickup* AmmoItem = Cast<AAmmoPickup>(OtherActor);
+	if (AmmoItem)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("¡Munición recogida!"));
+		AmmoItem->OnPickedUp(this);
+	}
+}
+
+
+
 
 void AIpvmultiCharacter::SetCurrentHealth(float healthValue)
 {
@@ -170,12 +192,23 @@ void AIpvmultiCharacter::OnHealthUpdate_Implementation()
 
 void AIpvmultiCharacter::StartFire()
 {
-	if (!bIsFiringWeapon)
+	if (AmmoCount > 0) 
 	{
-		bIsFiringWeapon = true;
-		UWorld* World = GetWorld();
-		World->GetTimerManager().SetTimer(FiringTimer, this, &AIpvmultiCharacter::StopFire, FireRate, false);
-		HandleFire();
+		if (!bIsFiringWeapon)
+		{
+			bIsFiringWeapon = true;
+			UWorld* World = GetWorld();
+			World->GetTimerManager().SetTimer(FiringTimer, this, &AIpvmultiCharacter::StopFire, FireRate, false);
+			HandleFire();
+		}
+
+		AmmoCount = FMath::Max(AmmoCount - 1, 0); 
+		OnRep_Ammo(); 
+	}
+	else
+	{
+		bIsFiringWeapon = false;
+		UE_LOG(LogTemp, Warning, TEXT("no hay balas"));
 	}
 }
 
@@ -183,6 +216,12 @@ void AIpvmultiCharacter::StopFire()
 {
 	bIsFiringWeapon = false;
 }
+
+void AIpvmultiCharacter::OnRep_Ammo()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Ammo actualizado en cliente: %d"), AmmoCount);
+}
+
 
 void AIpvmultiCharacter::HandleFire_Implementation()
 {

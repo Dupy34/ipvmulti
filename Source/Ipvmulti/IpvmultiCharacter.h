@@ -60,13 +60,18 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-			
+
+
+private:
+	FTimerHandle TimerHandle; 
 
 protected:
 
 	virtual void NotifyControllerChanged() override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void NotifyActorBeginOverlap(AActor* OtherActor);
+	
 
 public:
 	/** Returns CameraBoom subobject **/
@@ -89,6 +94,21 @@ public:
 	/** Event for taking damage. Overridden from APawn.*/
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float TakeDamage( float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser ) override;
+
+	UFUNCTION()
+	void OnRep_Ammo();
+
+	UPROPERTY(ReplicatedUsing=OnRep_Ammo)
+	int32 AmmoCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="UI")
+	TSubclassOf<UUserWidget> AmmoWidgetClass;
+
+	UUserWidget* AmmoWidgetInstance;
+
+	/** If true, you are in the process of firing projectiles. */
+	bool bIsFiringWeapon;
+	
 protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Health")
@@ -109,8 +129,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Gameplay")
 	float FireRate;
  
-	/** If true, you are in the process of firing projectiles. */
-	bool bIsFiringWeapon;
+
  
 	/** Function for beginning weapon fire.*/
 	UFUNCTION(BlueprintCallable, Category="Gameplay")
@@ -123,6 +142,8 @@ protected:
 	/** Server function for spawning projectiles.*/
 	UFUNCTION(Server, Reliable)
 	void HandleFire();
+
+	
  
 	/** A timer handle used for providing the fire rate delay in-between spawns.*/
 	FTimerHandle FiringTimer;
