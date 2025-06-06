@@ -104,12 +104,16 @@ void AIpvmultiCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AIpvmultiCharacter::Look);
+
+		// PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AIpvmultiCharacter::StartFire);
+
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AIpvmultiCharacter::StartFire);
 	}
 	else
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AIpvmultiCharacter::StartFire);
+	
  
 
 }
@@ -136,7 +140,7 @@ void AIpvmultiCharacter::OnRep_CurrentHealth()
 	OnHealthUpdate();
 }
 
-void AIpvmultiCharacter::OnHealthUpdate()
+void AIpvmultiCharacter::OnHealthUpdate_Implementation()
 {
 	//Client-specific functionality
 	if (IsLocallyControlled())

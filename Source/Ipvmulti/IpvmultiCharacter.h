@@ -44,6 +44,9 @@ class AIpvmultiCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* FireAction;
+
 public:
 	AIpvmultiCharacter();
 	/** Property replication */
@@ -96,7 +99,7 @@ protected:
  
 	UFUNCTION()
 	void OnRep_CurrentHealth();
-	
+	UFUNCTION(BlueprintNativeEvent, Category = "Health")
 	void OnHealthUpdate();
 
 	UPROPERTY(EditDefaultsOnly, Category="Gameplay|Projectile")
