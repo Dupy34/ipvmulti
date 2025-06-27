@@ -20,6 +20,7 @@ protected:
 public:
 	UFUNCTION()
 	void OnPickedUp(AActor* OtherActor);
+	void DestroyPickup();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* MeshComponent;

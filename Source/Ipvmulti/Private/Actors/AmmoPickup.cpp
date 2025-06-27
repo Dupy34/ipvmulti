@@ -6,10 +6,10 @@
 #include "Net/UnrealNetwork.h"
 
 
-AAmmoPickup::AAmmoPickup()
+AAmmoPickup::AAmmoPickup(): MeshComponent(nullptr), bHasBeenPickedUp(false)
 {
 	AmmoRestoreAmount = 5;
-	
+	SetReplicates(true);
 }
 
 void AAmmoPickup::BeginPlay()
@@ -26,16 +26,23 @@ void AAmmoPickup::OnPickedUp(AActor* OtherActor)
 	if (Player && Player->HasAuthority()) 
 		if (Player && Player->HasAuthority()) 
 		{
-			Player->AmmoCount = 5;
-			Player->OnRep_Ammo();
+			Player->Server_RefillAmmo_Implementation();
         
 			Player->bIsFiringWeapon = true; 
-
-			Destroy();
+			DestroyPickup();
 		}
-
-
 }
+
+void AAmmoPickup::DestroyPickup()
+{
+	if (HasAuthority())
+	{
+		Destroy();
+	}
+}
+
+
+
 
 void AAmmoPickup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {

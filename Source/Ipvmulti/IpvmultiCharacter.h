@@ -99,12 +99,23 @@ public:
 	void OnRep_Ammo();
 
 	UPROPERTY(ReplicatedUsing=OnRep_Ammo)
-	int32 AmmoCount;
+	int CurrentAmmo;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="UI")
-	TSubclassOf<UUserWidget> AmmoWidgetClass;
+	UPROPERTY(ReplicatedUsing=OnRep_Ammo)
+	int MaxAmmo;
 
-	UUserWidget* AmmoWidgetInstance;
+	UFUNCTION(BlueprintPure, Category="Combat")
+	FORCEINLINE float GetCurrentAmmo() const { return CurrentAmmo; }
+ 
+	/** Setter for Current Health. Clamps the value between 0 and MaxHealth and calls OnHealthUpdate. Should only be called on the server.*/
+	UFUNCTION(BlueprintCallable, Category="Combat")
+	void SetCurrentAmmo(float AmmoValue);
+	void Server_RefillAmmo_Implementation();
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="UI")
+	//TSubclassOf<UUserWidget> AmmoWidgetClass;
+
+	//UUserWidget* AmmoWidgetInstance;
 
 	/** If true, you are in the process of firing projectiles. */
 	bool bIsFiringWeapon;
@@ -117,9 +128,9 @@ protected:
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth;
  
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void OnRep_CurrentHealth();
-	UFUNCTION(BlueprintNativeEvent, Category = "Health")
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Health")
 	void OnHealthUpdate();
 
 	UPROPERTY(EditDefaultsOnly, Category="Gameplay|Projectile")
@@ -147,5 +158,19 @@ protected:
  
 	/** A timer handle used for providing the fire rate delay in-between spawns.*/
 	FTimerHandle FiringTimer;
+
+
+public:
+	
+	
+
+	UFUNCTION(BlueprintCallable)
+	void OpenLobby();
+
+	UFUNCTION(BlueprintCallable)
+	void CallOpenLevel(const FString& IPAdress);
+
+	UFUNCTION(BlueprintCallable)
+	void CallClientTravel(const FString& IPAdress);
 };
 

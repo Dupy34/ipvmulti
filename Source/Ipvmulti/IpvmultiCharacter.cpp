@@ -14,6 +14,7 @@
 #include "Engine/Engine.h"
 #include "ThirdPersonMPProjectile.h"
 #include "Actors/AmmoPickup.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -65,7 +66,8 @@ AIpvmultiCharacter::AIpvmultiCharacter()
 	//Initialize fire rate
 	FireRate = 0.25f;
 	bIsFiringWeapon = false;
-	AmmoCount = 5;
+	CurrentAmmo = 100;
+	MaxAmmo = 100;
 	
 	
 
@@ -76,7 +78,7 @@ void AIpvmultiCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(AIpvmultiCharacter, CurrentHealth);
-	DOREPLIFETIME(AIpvmultiCharacter, AmmoCount);
+	DOREPLIFETIME(AIpvmultiCharacter, CurrentAmmo);
 
 }
 
@@ -192,7 +194,7 @@ void AIpvmultiCharacter::OnHealthUpdate_Implementation()
 
 void AIpvmultiCharacter::StartFire()
 {
-	if (AmmoCount > 0) 
+	if (CurrentAmmo > 0) 
 	{
 		if (!bIsFiringWeapon)
 		{
@@ -202,7 +204,7 @@ void AIpvmultiCharacter::StartFire()
 			HandleFire();
 		}
 
-		AmmoCount = FMath::Max(AmmoCount - 1, 0); 
+		CurrentAmmo = FMath::Clamp(CurrentAmmo - 1, 0, MaxHealth);
 		OnRep_Ammo(); 
 	}
 	else
@@ -217,9 +219,41 @@ void AIpvmultiCharacter::StopFire()
 	bIsFiringWeapon = false;
 }
 
+void AIpvmultiCharacter::OpenLobby()
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+	World->ServerTravel("/Game/multi/maps/Lobby?listen");
+}
+
+void AIpvmultiCharacter::CallOpenLevel(const FString& IPAdress)
+{
+	UGameplayStatics::OpenLevel(this, *IPAdress);
+}
+
+void AIpvmultiCharacter::CallClientTravel(const FString& IPAdress)
+{
+	APlayerController* PlayerController = GetGameInstance()->GetFirstLocalPlayerController();
+	if (PlayerController)
+	{
+		PlayerController->ClientTravel(IPAdress, TRAVEL_Absolute);
+	}
+}
+
 void AIpvmultiCharacter::OnRep_Ammo()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Ammo actualizado en cliente: %d"), AmmoCount);
+	UE_LOG(LogTemp, Warning, TEXT("Ammo actualizado en cliente: %d"), CurrentAmmo);
+}
+
+void AIpvmultiCharacter::SetCurrentAmmo(float AmmoValue)
+{
+	
+}
+
+void AIpvmultiCharacter::Server_RefillAmmo_Implementation()
+{
+	CurrentAmmo = MaxAmmo;
+	OnRep_Ammo();
 }
 
 
