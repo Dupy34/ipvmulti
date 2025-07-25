@@ -8,11 +8,13 @@
 
 AIpvmultiGameMode::AIpvmultiGameMode()
 {
+	/*
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter"));
 	if (PlayerPawnBPClass.Class != NULL)
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+	*/
 	GameStateClass = AipvmultiGamaState::StaticClass();
 }
 
