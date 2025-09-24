@@ -15,6 +15,8 @@
 #include "ThirdPersonMPProjectile.h"
 #include "Actors/AmmoPickup.h"
 #include "Kismet/GameplayStatics.h"
+#include "OnlineSubsystem.h"
+#include "Interfaces/OnlineSessionInterface.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -69,7 +71,16 @@ AIpvmultiCharacter::AIpvmultiCharacter()
 	CurrentAmmo = 100;
 	MaxAmmo = 100;
 	
-	
+	IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
+	if (OnlineSubsystem)
+	{
+		OnlineSessionInterface = OnlineSubsystem->GetSessionInterface();
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Purple,
+				FString::Printf(TEXT("Found Online Subsystem %s"), *OnlineSubsystem->GetSubsystemName().ToString()));
+		}
+	}
 
 }
 

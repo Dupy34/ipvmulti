@@ -175,5 +175,8 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Gameplay")
 	bool bIsCarryinnObjective;
+
+public:
+	TSharedPtr <class IOnlineSession, ESPMode::ThreadSafe> OnlineSessionInterface; 
 };
 
