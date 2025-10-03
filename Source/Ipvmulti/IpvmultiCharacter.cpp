@@ -237,7 +237,7 @@ void AIpvmultiCharacter::OpenLobby()
 {
 	UWorld* World = GetWorld();
 	if (!World) return;
-	World->ServerTravel("/Game/multi/maps/Lobby?listen");
+	World->ServerTravel("/Game/multi/maps/whipeout?listen");
 }
 
 void AIpvmultiCharacter::CallOpenLevel(const FString& IPAdress)
@@ -358,6 +358,8 @@ void AIpvmultiCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSuc
 				FString::Printf(TEXT("Created Session %s"), *SessionName.ToString())
 			);
 		}
+		UWorld* World = GetWorld();
+		World->ServerTravel("/Game/multi/maps/whipeout?listen");
 	}
 	else
 	{

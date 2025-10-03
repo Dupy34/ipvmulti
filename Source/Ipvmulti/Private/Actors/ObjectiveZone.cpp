@@ -48,15 +48,15 @@ void AObjectiveZone::HandleOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 			);
 	}
 	AIpvmultiCharacter* MyPawn = Cast<AIpvmultiCharacter>(OtherActor);
-	if (MyPawn == nullptr) return;
-	if (MyPawn-> bIsCarryinnObjective)
-	{
+	//if (MyPawn == nullptr) return;
+	//if (MyPawn-> bIsCarryinnObjective)
+	//{
 		AIpvmultiGameMode* GM= Cast<AIpvmultiGameMode>(GetWorld()->GetAuthGameMode());
 		if (GM)
 		{
 			GM->CompleteMission(MyPawn);
 		}
-	}
+	//}
 }
 
 
