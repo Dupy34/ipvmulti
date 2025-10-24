@@ -190,6 +190,8 @@ protected:
 	//Callbacks
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccess);
 
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type);
+
 	UFUNCTION(BlueprintCallable)
 	void JoinGameSession();
 
@@ -199,6 +201,8 @@ private:
 	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate;
 
 	FOnFindSessionsCompleteDelegate FindSessionsCompleteDelegate;
+
+	FOnJoinSessionCompleteDelegate JoinSessionCompleteDelegate;
 
 	//SessionSearch
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;

@@ -2,6 +2,8 @@
 
 #include "IpvmultiCharacter.h"
 #include "IpvmultiCharacter.h"
+
+#include "BlendSpaceAnalysis.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -28,7 +30,8 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 AIpvmultiCharacter::AIpvmultiCharacter():
 CreateSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this, &AIpvmultiCharacter::OnCreateSessionComplete)),
-FindSessionsCompleteDelegate(FOnFindSessionsCompleteDelegate::CreateUObject(this, &AIpvmultiCharacter::OnFindSessionsComplete))
+FindSessionsCompleteDelegate(FOnFindSessionsCompleteDelegate::CreateUObject(this, &AIpvmultiCharacter::OnFindSessionsComplete)),
+JoinSessionCompleteDelegate(FOnJoinSessionCompleteDelegate::CreateUObject(this, &AIpvmultiCharacter::OnJoinSessionComplete))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -342,6 +345,8 @@ void AIpvmultiCharacter::CreateGameSession()
 	SessionSettings->bShouldAdvertise = true;
 	SessionSettings->bUsesPresence = true;
 	SessionSettings->bUseLobbiesIfAvailable = true ;
+	SessionSettings->Set(FName("MatchType"), FString("FreeForAll"), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	
 
 	const ULocalPlayer* LocalPlayer=GetWorld()->GetFirstLocalPlayerFromController();
 
@@ -354,6 +359,8 @@ void AIpvmultiCharacter::OnFindSessionsComplete(bool bWasSuccess)
 	{
 		FString Id = Result.GetSessionIdStr();
 		FString User = Result.Session.OwningUserName;
+		FString MatchType;
+		Result.Session.SessionSettings.Get(FName("MatchType"), MatchType);
 
 		if(GEngine)
 		{
@@ -363,6 +370,24 @@ void AIpvmultiCharacter::OnFindSessionsComplete(bool bWasSuccess)
 				FColor::Orange,
 				FString::Printf(TEXT("Id: %s, User: %s"), *Id, *User)
 			);
+		}
+		if (MatchType == FString("FreeForAll"))
+		{
+			if(GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(
+					-1,
+					15.f,
+					FColor::Orange,
+					FString::Printf(TEXT("Joining Match Type:%s" ), *MatchType)
+				);
+			}
+			OnlineSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegate);
+			//joinsession
+
+			const ULocalPlayer* LocalPlayer=GetWorld()->GetFirstLocalPlayerFromController();
+
+			OnlineSessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, Result);
 		}
 	}
 }
@@ -383,6 +408,7 @@ void AIpvmultiCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSuc
 			);
 		}
 		UWorld* World = GetWorld();
+		if (!World) return;
 		World->ServerTravel("/Game/multi/maps/whipeout?listen");
 	}
 	else
@@ -395,6 +421,31 @@ void AIpvmultiCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSuc
 		);
 	}
 }
+
+void AIpvmultiCharacter::OnJoinSessionComplete(FName JoinSession, EOnJoinSessionCompleteResult::Type)
+{
+	if (!OnlineSessionInterface.IsValid()) return;
+	FString Address;
+	
+	if(OnlineSessionInterface->GetResolvedConnectString(NAME_GameSession, Address))
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Blue,
+				FString::Printf(TEXT("Connect string %s"), *Address)
+			);
+		}
+		APlayerController *PlayerController=GetGameInstance()->GetFirstLocalPlayerController();
+		if (PlayerController)
+		{
+			PlayerController->ClientTravel(Address, TRAVEL_Absolute);
+		}
+	}
+}
+
 
 void AIpvmultiCharacter::JoinGameSession()
 {
