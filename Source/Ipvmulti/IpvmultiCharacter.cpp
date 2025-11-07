@@ -240,7 +240,7 @@ void AIpvmultiCharacter::OpenLobby()
 {
 	UWorld* World = GetWorld();
 	if (!World) return;
-	World->ServerTravel("/Game/multi/maps/whipeout?listen");
+	World->ServerTravel("/Game/multi/maps/whipeout?listen"); 
 }
 
 void AIpvmultiCharacter::CallOpenLevel(const FString& IPAdress)
@@ -346,7 +346,7 @@ void AIpvmultiCharacter::CreateGameSession()
 	SessionSettings->Set(FName("MatchType"), FString("FreeForAll"), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	
 
-	const ULocalPlayer* LocalPlayer=GetWorld()->GetFirstLocalPlayerFromController();
+	const ULocalPlayer* LocalPlayer=GetWorld()->GetFirstLocalPlayerFromController(); 
 
 	OnlineSessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessionSettings);
 }
@@ -425,7 +425,7 @@ void AIpvmultiCharacter::OnJoinSessionComplete(FName JoinSession, EOnJoinSession
 	if (!OnlineSessionInterface.IsValid()) return;
 	FString Address;
 	
-	if(OnlineSessionInterface->GetResolvedConnectString(NAME_GameSession, Address))
+	if(OnlineSessionInterface->GetResolvedConnectString(JoinSession, Address))
 	{
 		if (GEngine)
 		{
