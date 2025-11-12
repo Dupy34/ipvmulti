@@ -381,6 +381,8 @@ void AIpvmultiCharacter::OnFindSessionsComplete(bool bWasSuccess)
 				);
 			}
 			OnlineSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegate);
+			Result.Session.SessionSettings.bUseLobbiesIfAvailable = true;
+			Result.Session.SessionSettings.bUsesPresence = true;
 			//joinsession
 
 			const ULocalPlayer* LocalPlayer=GetWorld()->GetFirstLocalPlayerFromController();
